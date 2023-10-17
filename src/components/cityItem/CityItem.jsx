@@ -14,7 +14,6 @@ export default function CityItem({city}) {
     <li>
       <Link to={`${id}?lat=${lat}&lng=${long}`} 
       className={`${styles.cityItem} ${id === currentCity.id? styles['cityItem--active']:''}`}>
-      {console.log(date.toDate(), typeof date)}
         <span className={styles.emoji}>{convertToEmoji('U+1F604')}</span>
         <h3 className={styles.name}>{city_name}</h3>
         <time className={styles.date}>{}</time>

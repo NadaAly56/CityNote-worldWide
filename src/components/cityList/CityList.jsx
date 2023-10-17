@@ -5,9 +5,8 @@ import Spinner from "../spinner/Spinner";
 import styles from "./CityList.module.css";
 export default function CityList() {
   const {isLoading, cities} = useCities()
-  return isLoading ? (
-    <Spinner />
-  ) : cities.length <= 0 ? (
+  if (isLoading) return <Spinner />
+  return cities.length <= 0 ? (
     <Message message="Add your first city by clicking on a city on the map" />
   ) : (
     <ul className={styles.cityList}>

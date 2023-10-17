@@ -4,7 +4,7 @@ import { collection, doc, getDoc, getDocs } from "firebase/firestore/lite";
 
 const CitiesContext = createContext();
 function CitiesProvider({ children }) {
-  const [cities, setCities] = useState([{}]);
+  const [cities, setCities] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentCity, setCurrentCity] = useState({});
 
