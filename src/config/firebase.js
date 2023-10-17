@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { collection,  getDocs, getFirestore } from "firebase/firestore/lite"
+import { collection,  doc,  getDoc,  getDocs, getFirestore } from "firebase/firestore/lite"
 
 // web app's Firebase configuration
 const firebaseConfig = {
@@ -13,18 +13,4 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-async function getCities(){
-        const citiesCol = collection(db, 'cities')
-        const citySnapshot = await getDocs(citiesCol)
-        const cityList = [];
-        citySnapshot.forEach((doc) => {
-          cityList.push(doc.data());
-        });
-        return cityList;
-}
-
-export {
-    getCities,
-}
+export const db = getFirestore(app);
