@@ -8,6 +8,7 @@ import AppLayout from "./pages/AppLayout";
 import CityList from "./components/cityList/CityList";
 import { useEffect, useState } from "react";
 import { getCities } from "./config/firebase";
+import CountryList from "./components/countryList/countryList";
 
 function App() {
   const [cities, setCities] = useState([{}])
@@ -31,7 +32,7 @@ function App() {
     <Route path="app" element={<AppLayout/>}>
       {/* <Route index element={<CityList cities={cities} isLoading={isLoading} />}></Route> */}
       <Route path="cities" element={<CityList cities={cities} isLoading={isLoading} />}></Route>
-      <Route path="countries" ></Route>
+      <Route path="countries" element={<CountryList cities={cities} isLoading={isLoading} />} ></Route>
       <Route path="form" ></Route>
     </Route>
     <Route path="/pricing" element={<PricingPage/>}></Route>
