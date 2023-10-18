@@ -1,8 +1,10 @@
+import { NavBar } from "../components/navbar/navBar";
 import styles from "./styles/Product.module.css";
 
 export default function PricingPage() {
   return (
     <main className={styles.product}>
+      <NavBar />
       <section>
         <div>
           <h2>

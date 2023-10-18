@@ -1,24 +1,24 @@
 import React, { useEffect, useState } from 'react'
 import styles from './Map.module.css'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate} from 'react-router-dom'
 import { MapContainer, Marker, Popup, TileLayer, useMap, useMapEvents } from 'react-leaflet';
 import { useCities } from '../../contexts/citiesContext';
-import useGeolocation from '../../hooks/GeoLocation';
+import useGeolocation from '../../hooks/useGeoLocation';
 import Button from '../button/Button';
+import useUrlPosition from '../../hooks/useUrlPosition';
+import { v4 as uuidv4 } from 'uuid';
 export default function Map() {
   const { cities} = useCities()
-  const [searchParams, setSearchParams] = useSearchParams();
   const [mapPosition, setMapPosition] = useState([40,0])
   const {isLoading, position, getPosition} = useGeolocation()
-  const lat = searchParams.get('lat')
-  const lng = searchParams.get('lng') 
+  const [lat, lng] = useUrlPosition()
 
   useEffect(()=>{
     if(lat && lng) setMapPosition([lat, lng])
   },[lat, lng])
 
   useEffect(()=>{
-    if (position) setMapPosition(position)
+    if (position) setMapPosition([position.lat, position.lng])
   },[position])
   return   (
     <div className={styles.mapContainer}>
@@ -37,7 +37,7 @@ export default function Map() {
       </Marker>
     {
      cities.map(city=>{
-        return <Marker key={city.id} position={[city.position._lat, city.position._long]}>
+        return <Marker key={uuidv4()} position={[city.position._lat, city.position._long]}>
         <Popup>
           {city.city_name}
         </Popup>

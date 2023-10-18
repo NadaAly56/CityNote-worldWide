@@ -1,13 +1,15 @@
 import { useState } from "react";
 import styles from "./styles/Login.module.css";
+import { NavBar } from "../components/navbar/navBar";
+import { Link } from "react-router-dom";
 
 export default function Login() {
-  // PRE-FILL FOR DEV PURPOSES
   const [email, setEmail] = useState("jack@example.com");
   const [password, setPassword] = useState("qwerty");
 
   return (
     <main className={styles.login}>
+      <NavBar />
       <form className={styles.form}>
         <div className={styles.row}>
           <label htmlFor="email">Email address</label>
@@ -30,7 +32,7 @@ export default function Login() {
         </div>
 
         <div>
-          <button>Login</button>
+          <Link to='' >Login</Link>
         </div>
       </form>
     </main>

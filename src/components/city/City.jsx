@@ -8,9 +8,6 @@ export default function City() {
     const {currentCity, setCurrentCity, getCurrentCity, isLoading} = useCities()
     const navigate = useNavigate()
     const {id} = useParams()
-    const [searchParams, setSearchParams] = useSearchParams();
-    const lat = searchParams.get('lat')
-    const lng = searchParams.get('lng')
     useEffect(()=>{
         getCurrentCity(id).then((data)=>{
             setCurrentCity(data)

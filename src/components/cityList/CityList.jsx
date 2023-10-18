@@ -3,6 +3,7 @@ import CityItem from "../cityItem/CityItem";
 import Message from "../message/Message";
 import Spinner from "../spinner/Spinner";
 import styles from "./CityList.module.css";
+import { v4 as uuidv4 } from 'uuid';
 export default function CityList() {
   const {isLoading, cities} = useCities()
   if (isLoading) return <Spinner />
@@ -11,7 +12,7 @@ export default function CityList() {
   ) : (
     <ul className={styles.cityList}>
       {cities.map((city) => (
-        <CityItem key={city.id} city={city} />
+        <CityItem key={uuidv4()} city={city} />
       ))}
     </ul>
   );
