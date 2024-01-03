@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { db } from "../config/firebase";
-import { collection, doc, getDoc, getDocs } from "firebase/firestore/lite";
+import { collection, doc, getDoc, getDocs, setDoc, deleteDoc } from "firebase/firestore/lite";
+import { v4 as uuidv4 } from 'uuid';
 
 const CitiesContext = createContext();
 function CitiesProvider({ children }) {
@@ -27,22 +28,45 @@ function CitiesProvider({ children }) {
     const citySnapshot = await getDocs(citiesCol)
     const cityList = [];
     citySnapshot.forEach((doc) => {
-      cityList.push(doc.data());
+      cityList.push({...doc.data(), id:doc.id});
     });
     return cityList;
 }
 
 async function getCurrentCity(id){
     setIsLoading(true)
-    const cityCol = doc(db, 'cities', id)
-    const citySnapshot = await getDoc(cityCol)
+    const cityRef = doc(db, 'cities', id)
+    const citySnapshot = await getDoc(cityRef)
     setIsLoading(false)
     if (citySnapshot.exists()) {
-      const city = citySnapshot.data()
+      const city = {...citySnapshot.data(), id:citySnapshot.id}
       return city;
     }
     else return "no city exists with this id"
   }
+
+async function addCity(data) {
+  const docRef = doc(db, 'cities', uuidv4())
+    await setDoc(docRef, data).then(docRef => {
+      console.log("Document has been added successfully")
+  })
+  .catch(error => {
+      console.log(error);
+  })
+  setCities(arr=>[...arr, data])
+}
+
+async function deleteCity(id) {
+  setIsLoading(true)
+  const docRef = doc(db, 'cities',id)
+  await deleteDoc(docRef).then(docRef => {
+    console.log("Document has been deleted")
+})
+.catch(error => {
+    console.log(error);
+}).finally(()=>setIsLoading(false))
+setCities(arr=>cities.filter(c=>c.id !== id))
+}
   return (
     <CitiesContext.Provider
       value={{
@@ -51,6 +75,8 @@ async function getCurrentCity(id){
         setCurrentCity,
         currentCity,
         getCurrentCity,
+        addCity,
+        deleteCity
       }}
     >
       {children}

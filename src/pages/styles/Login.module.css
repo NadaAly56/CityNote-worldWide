@@ -18,9 +18,25 @@
   width: 48rem;
   margin: 8rem auto;
 }
+.form.loading {
+  opacity: 0.3;
+}
 
+.form.loading button {
+  pointer-events: none;
+  background-color: var(--color-light--1);
+  border: 1px solid var(--color-light--1);
+  color: var(--color-dark--0);
+}
 .row {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+.error {
+  padding:10px;
+  background-color:var(--color-brand--2);
+  margin:10px;
+  font-size: large;
+  border-radius: 5px;
 }

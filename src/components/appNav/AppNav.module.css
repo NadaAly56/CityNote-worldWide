@@ -1,11 +1,12 @@
 .nav {
-  margin-top: 3rem;
-  margin-bottom: 2rem;
+  margin: 3rem auto 2rem auto;
+  width: auto;
 }
 
 .nav ul {
   list-style: none;
   display: flex;
+  justify-content: center;
   background-color: var(--color-dark--2);
   border-radius: 7px;
 }
@@ -22,7 +23,6 @@
   border-radius: 5px;
 }
 
-/* CSS Modules feature */
 .nav a:global(.active) {
   background-color: var(--color-dark--0);
 }

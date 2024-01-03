@@ -10,11 +10,14 @@ import CountryList from "./components/countryList/countryList";
 import City from "./components/city/City";
 import Form from "./components/form/Form";
 import { CitiesProvider } from "./contexts/citiesContext";
+import SignUpPage from "./pages/SignUpPage";
+import UserProvider from "./contexts/userContext";
 
 function App() {
   
   return <div>
     <CitiesProvider>
+    <UserProvider>
     <BrowserRouter>
   <Routes>
     <Route index element={<Home/>}></Route>
@@ -28,9 +31,11 @@ function App() {
     <Route path="/pricing" element={<PricingPage/>}></Route>
     <Route path="/product" element={<ProductPage/>}></Route>
     <Route path="/login" element={<Login/>}></Route>
+    <Route path="/signup" element={<SignUpPage/>}></Route>
     <Route path="*" element={<NotFound/>}></Route>
   </Routes>
   </BrowserRouter>
+  </UserProvider>
   </CitiesProvider>
     </div>
 }
