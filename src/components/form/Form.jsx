@@ -9,6 +9,7 @@ import { Timestamp, GeoPoint } from "@firebase/firestore/lite";
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
 import { useCities } from "../../contexts/citiesContext";
+import { v4 as uuidv4 } from 'uuid';
 
 export function convertToEmoji(countryCode) {
   const codePoints = countryCode
@@ -61,6 +62,7 @@ function Form() {
     if (!cityName || !date) return;
     const city = {
       city_name: cityName,
+      id: uuidv4(),
       country,
       emoji,
       date: Timestamp.fromDate(new Date(date)),

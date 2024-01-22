@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { db } from "../config/firebase";
 import { collection, doc, getDoc, getDocs, setDoc, deleteDoc } from "firebase/firestore/lite";
-import { v4 as uuidv4 } from 'uuid';
 
 const CitiesContext = createContext();
 function CitiesProvider({ children }) {
@@ -14,7 +13,6 @@ function CitiesProvider({ children }) {
       setIsLoading(true);
       await getCities()
         .then((data) => {
-          console.log(data);
           setCities(data);
           setIsLoading(false);
         })
@@ -29,7 +27,9 @@ function CitiesProvider({ children }) {
     const cityList = [];
     citySnapshot.forEach((doc) => {
       cityList.push({...doc.data(), id:doc.id});
+      console.log({...doc.data(), id:doc.id});
     });
+    console.log(cities);
     return cityList;
 }
 
@@ -40,15 +40,17 @@ async function getCurrentCity(id){
     setIsLoading(false)
     if (citySnapshot.exists()) {
       const city = {...citySnapshot.data(), id:citySnapshot.id}
+      setCurrentCity(city)
       return city;
     }
     else return "no city exists with this id"
   }
 
 async function addCity(data) {
-  const docRef = doc(db, 'cities', uuidv4())
+  const docRef = doc(db, 'cities', data.id)
+  console.log(data, docRef);
     await setDoc(docRef, data).then(docRef => {
-      console.log("Document has been added successfully")
+      console.log("Document has been added successfully", docRef)
   })
   .catch(error => {
       console.log(error);
@@ -76,7 +78,8 @@ setCities(arr=>cities.filter(c=>c.id !== id))
         currentCity,
         getCurrentCity,
         addCity,
-        deleteCity
+        deleteCity,
+        getCities
       }}
     >
       {children}

@@ -9,9 +9,7 @@ export default function City() {
     const navigate = useNavigate()
     const {id} = useParams()
     useEffect(()=>{
-        getCurrentCity(id).then((data)=>{
-            setCurrentCity(data)
-        })
+        getCurrentCity(id)
     },[id])
     if (isLoading) return <Spinner />
     const {city_name, date, notes, emoji} = currentCity

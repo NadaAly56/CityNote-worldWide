@@ -9,7 +9,6 @@ export default function CityItem({city}) {
     const long = position._long
     const formatedDate = date && date.toDate()? date.toDate().toDateString():"date"
     function handleDelete(e) {
-      console.log(id);
       e.preventDefault()
       deleteCity(id)
     }
