@@ -1,7 +1,7 @@
 import React from 'react'
 import styles from './styles/homepage.module.css'
 import { Link } from 'react-router-dom'
-import { NavBar } from '/@/components/navbar/navBar'
+import { NavBar } from '../components/navbar/navBar'
 export default function Home() {
   return  <main className={styles.homepage}>
     <NavBar />
