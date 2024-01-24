@@ -1,4 +1,4 @@
-import { NavBar } from "../components/navbar/navBar";
+import { NavBar } from "/@/components/navbar/navBar";
 import styles from "./styles/Product.module.css";
 
 export default function PricingPage() {
