@@ -1,85 +1,124 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useReducer,
+} from "react";
 import { db } from "../config/firebase";
-import { collection, doc, getDoc, getDocs, setDoc, deleteDoc } from "firebase/firestore/lite";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  deleteDoc,
+} from "firebase/firestore/lite";
 
 const CitiesContext = createContext();
+
+const initialState = {
+  cities: [],
+  isLoading: false,
+  currentCity: {},
+};
+function reducer(state, { type, payload }) {
+  switch (type) {
+    case "dataLoading":
+      return { ...state, isLoading: true };
+    case "getAllCities":
+      return { ...state, isLoading: false, cities: payload };
+    case "getCurrentCity":
+      return { ...state, isLoading: false, currentCity: payload };
+    case "addCity":
+      return { ...state, isLoading: false, cities: [...state.cities, payload] };
+    case "deleteCity":
+      return {
+        ...state,
+        isLoading: false,
+        cities: state.cities.filter((city) => city.id !== payload),
+      };
+    default:
+      return "Unknowen type";
+  }
+}
 function CitiesProvider({ children }) {
-  const [cities, setCities] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [currentCity, setCurrentCity] = useState({});
+  const [{ cities, isLoading, currentCity }, dispatch] = useReducer(
+    reducer,
+    initialState
+  );
 
   useEffect(() => {
     async function fetchData() {
-      setIsLoading(true);
+      dispatch({ type: "dataLoading" });
       await getCities()
         .then((data) => {
-          setCities(data);
-          setIsLoading(false);
+          dispatch({ type: "getAllCities", payload: data });
         })
         .catch((err) => console.log(err));
     }
     fetchData();
   }, []);
 
-  async function getCities(){
-    const citiesCol = collection(db, 'cities')
-    const citySnapshot = await getDocs(citiesCol)
+  async function getCities() {
+    const citiesCol = collection(db, "cities");
+    const citySnapshot = await getDocs(citiesCol);
     const cityList = [];
     citySnapshot.forEach((doc) => {
-      cityList.push({...doc.data(), id:doc.id});
-      console.log({...doc.data(), id:doc.id});
+      cityList.push({ ...doc.data(), id: doc.id });
+      console.log({ ...doc.data(), id: doc.id });
     });
     console.log(cities);
     return cityList;
-}
-
-async function getCurrentCity(id){
-    setIsLoading(true)
-    const cityRef = doc(db, 'cities', id)
-    const citySnapshot = await getDoc(cityRef)
-    setIsLoading(false)
-    if (citySnapshot.exists()) {
-      const city = {...citySnapshot.data(), id:citySnapshot.id}
-      setCurrentCity(city)
-      return city;
-    }
-    else return "no city exists with this id"
   }
 
-async function addCity(data) {
-  const docRef = doc(db, 'cities', data.id)
-  console.log(data, docRef);
-    await setDoc(docRef, data).then(docRef => {
-      console.log("Document has been added successfully", docRef)
-  })
-  .catch(error => {
-      console.log(error);
-  })
-  setCities(arr=>[...arr, data])
-}
+  async function getCurrentCity(id) {
+    dispatch({ type: "dataLoading" });
+    const cityRef = doc(db, "cities", id);
+    const citySnapshot = await getDoc(cityRef);
+    if (citySnapshot.exists()) {
+      const city = { ...citySnapshot.data(), id: citySnapshot.id };
+      dispatch({ type: "getCurrentCity", payload: city });
+      return city;
+    } else return "no city exists with this id";
+  }
 
-async function deleteCity(id) {
-  setIsLoading(true)
-  const docRef = doc(db, 'cities',id)
-  await deleteDoc(docRef).then(docRef => {
-    console.log("Document has been deleted")
-})
-.catch(error => {
-    console.log(error);
-}).finally(()=>setIsLoading(false))
-setCities(arr=>cities.filter(c=>c.id !== id))
-}
+  async function addCity(data) {
+    const docRef = doc(db, "cities", data.id);
+    console.log(data, docRef);
+    await setDoc(docRef, data)
+      .then((docRef) => {
+        console.log("Document has been added successfully", docRef);
+        dispatch({ type: "addCity", payload: data });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
+
+  async function deleteCity(id) {
+    dispatch({ type: "dataLoading" });
+    const docRef = doc(db, "cities", id);
+    await deleteDoc(docRef)
+      .then((docRef) => {
+        console.log("Document has been deleted");
+      })
+      .catch((error) => {
+        console.log(error);
+      })
+      .finally(() => {
+        dispatch({ type: "deleteCity", payload: id });
+      });
+  }
   return (
     <CitiesContext.Provider
       value={{
         cities,
         isLoading,
-        setCurrentCity,
         currentCity,
         getCurrentCity,
         addCity,
         deleteCity,
-        getCities
+        getCities,
       }}
     >
       {children}

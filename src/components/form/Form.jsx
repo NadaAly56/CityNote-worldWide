@@ -63,6 +63,7 @@ function Form() {
     const city = {
       city_name: cityName,
       id: uuidv4(),
+      userId:"",
       country,
       emoji,
       date: Timestamp.fromDate(new Date(date)),
