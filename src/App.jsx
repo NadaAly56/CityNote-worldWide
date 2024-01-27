@@ -16,9 +16,9 @@ import UserProvider from "./contexts/userContext";
 function App() {
   
   return <div>
-    <CitiesProvider>
-    <UserProvider>
     <BrowserRouter>
+    <UserProvider>
+    <CitiesProvider>
   <Routes>
     <Route index element={<Home/>}></Route>
     <Route path="app" element={<AppLayout/>}>
@@ -34,9 +34,9 @@ function App() {
     <Route path="/signup" element={<SignUpPage/>}></Route>
     <Route path="*" element={<NotFound/>}></Route>
   </Routes>
-  </BrowserRouter>
-  </UserProvider>
   </CitiesProvider>
+  </UserProvider>
+  </BrowserRouter>
     </div>
 }
 

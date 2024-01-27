@@ -14,9 +14,7 @@ export default function Login() {
   async function handleSignIn(e){
     e.preventDefault()
     await signIn(email, password)
-    if (user.name) {
-      navigate('/app')
-    }
+    
     console.log("user", user);
 }
   useEffect(()=>{

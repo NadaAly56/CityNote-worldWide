@@ -12,7 +12,12 @@ import {
   getDocs,
   setDoc,
   deleteDoc,
+  query, where
 } from "firebase/firestore/lite";
+// import { query, where } from "@firebase/firestore";
+import useDecodeToken from "../hooks/useDecodeToken";
+import useLoacalStorage from "../hooks/useLocalStorage";
+import { useUser } from "./userContext";
 
 const CitiesContext = createContext();
 
@@ -20,66 +25,76 @@ const initialState = {
   cities: [],
   isLoading: false,
   currentCity: {},
+  error:"",
 };
 function reducer(state, { type, payload }) {
   switch (type) {
-    case "dataLoading":
+    case "data/loading":
       return { ...state, isLoading: true };
-    case "getAllCities":
-      return { ...state, isLoading: false, cities: payload };
-    case "getCurrentCity":
+    case "cities/loaded":
+      return { ...state, isLoading: false, cities: [...payload] };
+    case "cities/currentCity":
       return { ...state, isLoading: false, currentCity: payload };
-    case "addCity":
-      return { ...state, isLoading: false, cities: [...state.cities, payload] };
-    case "deleteCity":
+    case "cities/created":
+      return { ...state, isLoading: false, cities: [...state.cities, payload], currentCity:payload };
+    case "cities/deleted":
       return {
         ...state,
         isLoading: false,
         cities: state.cities.filter((city) => city.id !== payload),
       };
+    case "data/rejected": 
+      return {...state, isLoading:false, error:payload}
     default:
       return "Unknowen type";
   }
 }
 function CitiesProvider({ children }) {
-  const [{ cities, isLoading, currentCity }, dispatch] = useReducer(
+  const [token] = useLoacalStorage("", "token")
+  const {user} = useUser()
+  const decodedToken = useDecodeToken(token) 
+  const [{ cities, isLoading, currentCity, error }, dispatch] = useReducer(
     reducer,
     initialState
   );
 
   useEffect(() => {
+    console.log("token: ", decodedToken.user_id);
     async function fetchData() {
-      dispatch({ type: "dataLoading" });
+      dispatch({ type: "data/loading" });
       await getCities()
         .then((data) => {
-          dispatch({ type: "getAllCities", payload: data });
+          dispatch({ type: "cities/loaded", payload: data });
         })
-        .catch((err) => console.log(err));
+        .catch((err) => dispatch({type:"data/rejected", payload:err}));
     }
     fetchData();
-  }, []);
+  }, [decodedToken.user_id, user.id]);
 
   async function getCities() {
     const citiesCol = collection(db, "cities");
-    const citySnapshot = await getDocs(citiesCol);
+    const citiesByUserId = query(citiesCol, where('userId', '==', decodedToken.user_id))
+    const citySnapshot = await getDocs(citiesByUserId);
     const cityList = [];
     citySnapshot.forEach((doc) => {
       cityList.push({ ...doc.data(), id: doc.id });
-      console.log({ ...doc.data(), id: doc.id });
+      // setState({ ...state, cities: [...state.cities, newCity] });
     });
+    dispatch({type:"cities/loaded", payload:cityList})
     console.log(cities);
     return cityList;
   }
 
   async function getCurrentCity(id) {
-    dispatch({ type: "dataLoading" });
+    if (id === currentCity.id) return;
+    dispatch({ type: "data/loading" });
     const cityRef = doc(db, "cities", id);
     const citySnapshot = await getDoc(cityRef);
     if (citySnapshot.exists()) {
       const city = { ...citySnapshot.data(), id: citySnapshot.id };
-      dispatch({ type: "getCurrentCity", payload: city });
+      dispatch({ type: "cities/currentCity", payload: city });
       return city;
-    } else return "no city exists with this id";
+    } else dispatch({type:"data/rejected", payload:"no city exists with this id"})
   }
 
   async function addCity(data) {
@@ -88,26 +103,24 @@ function CitiesProvider({ children }) {
     await setDoc(docRef, data)
       .then((docRef) => {
         console.log("Document has been added successfully", docRef);
-        dispatch({ type: "addCity", payload: data });
+        dispatch({ type: "cities/created", payload: data });
       })
       .catch((error) => {
-        console.log(error);
+        dispatch({type:"data/rejected", payload:error})
       });
   }
 
   async function deleteCity(id) {
-    dispatch({ type: "dataLoading" });
+    dispatch({ type: "data/loading" });
     const docRef = doc(db, "cities", id);
     await deleteDoc(docRef)
       .then((docRef) => {
         console.log("Document has been deleted");
+        dispatch({ type: "cities/deleted", payload: id });
       })
       .catch((error) => {
-        console.log(error);
+        dispatch({type:"data/rejected", payload:error})
       })
-      .finally(() => {
-        dispatch({ type: "deleteCity", payload: id });
-      });
   }
   return (
     <CitiesContext.Provider
@@ -115,6 +128,8 @@ function CitiesProvider({ children }) {
         cities,
         isLoading,
         currentCity,
+        error,
+        dispatch,
         getCurrentCity,
         addCity,
         deleteCity,

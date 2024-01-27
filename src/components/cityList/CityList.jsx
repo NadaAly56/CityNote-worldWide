@@ -7,10 +7,10 @@ import styles from "./CityList.module.css";
 import { v4 as uuidv4 } from 'uuid';
 export default function CityList() {
   const {isLoading, cities, getCities} = useCities()
-  useEffect(()=>{
-    getCities()
-    console.log(cities);
-  },[])
+  // useEffect(()=>{
+  //   getCities()
+  //   console.log(cities);
+  // },[])
   if (isLoading) return <Spinner />
   return cities.length <= 0 ? (
     <Message message="Add your first city by clicking on a city on the map" />
