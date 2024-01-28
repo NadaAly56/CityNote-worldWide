@@ -6,14 +6,20 @@ import { useUser } from '../contexts/userContext';
 import { useNavigate } from 'react-router-dom';
 export default function SignUpPage() {
   const navigate = useNavigate()
-    const { signUp, isLoading, error } = useUser()
+    const { signUp, isLoading, error, dispatch } = useUser()
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("qwerty");
     const [name, setName] = useState('')
     
     async function handleSignUp(e){
         e.preventDefault()
-        await signUp(email, password, name)
+        if (name && email && password)
+          signUp(email, password, name)
+          .then(()=>navigate('/login', {replace:true}))
+        else dispatch({type:"rejected", payload:"All fields are required"})
+          // .catch((err)=>console.log(err))
+          
+
        
     }
     return (

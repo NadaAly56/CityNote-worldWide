@@ -6,24 +6,32 @@ import { useUser } from "../contexts/userContext";
 import Button from "../components/button/Button";
 
 export default function Login() {
-  const { signIn,  isLoading, user } = useUser()
+  const { signIn,  isLoading, isUserSigned, error, dispatch } = useUser()
   const navigate = useNavigate()
   const [email, setEmail] = useState("jack@example.com");
   const [password, setPassword] = useState("qwerty");
   
-  async function handleSignIn(e){
+  async function handleSubmit(e){
     e.preventDefault()
-    await signIn(email, password)
+    if (email && password)
+    signIn(email, password)
+else dispatch({type:"rejected", payload:"Please fill all data"})
     
-    console.log("user", user);
+    // console.log("user", user);
 }
   useEffect(()=>{
-    if (user.name) return navigate('/')
-  },[user])
+    if (isUserSigned)
+       navigate('/app', {replace:true})
+  },[isUserSigned, navigate])
   return (
     <main className={styles.login}>
       <NavBar />
-      <form className={`${styles.form} ${isLoading? styles.loading:''}`}>
+      <form className={`${styles.form} ${isLoading? styles.loading:''}`}
+      onSubmit={handleSubmit}
+      >
+        {
+            error && <div className={styles.error}>{error}</div>
+          }
         <div className={styles.row}>
           <label htmlFor="email">Email address</label>
           <input
@@ -45,7 +53,7 @@ export default function Login() {
         </div>
 
         <div>
-        <Button type='primary' onClick={handleSignIn}>
+        <Button type='primary'>
                 {isLoading?'Loading...':'Log in'}
             </Button>
         </div>

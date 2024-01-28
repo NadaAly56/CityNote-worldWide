@@ -6,10 +6,6 @@ import { useUser } from '../../contexts/userContext';
 
 export const NavBar = () => {
   const {handleSignOut, isUserSigned} = useUser()
-  useEffect(()=>{
-   
-    console.log(isUserSigned);
-  },[isUserSigned])
   return (
     <nav className={styles.nav}>
       <Logo />

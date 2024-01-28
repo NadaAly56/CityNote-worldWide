@@ -1,13 +1,12 @@
-  import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut, validatePassword } from 'firebase/auth'
-  import React, { createContext, useContext, useEffect, useReducer, useState } from 'react'
+  import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'firebase/auth'
+  import React, { createContext, useContext, useEffect, useReducer } from 'react'
   import { auth, db } from '../config/firebase'
   import { doc, getDoc, setDoc } from '@firebase/firestore/lite'
-  import { useNavigate } from 'react-router-dom'
 
   const UserContext = createContext()
 
   const initialState = {
-    user:{},
+    user:null,
     isUserSigned: false,
     error:"",
     isLoading: false,
@@ -18,52 +17,69 @@
       case "loading":
         return {...state, isLoading:true}
       case "user/authanticated":
-          return {...state, isLoading: false, isUserSigned: payload}
+          return {...state, isUserSigned: true,  error:""}
       case "user/signIn":
-        return {...state, isLoading: false, isUserSigned: true, user:payload}
+        return {...state, isLoading: false, isUserSigned: true, user:payload, error:""}
       case "user/signOut":
-        return {...state, isLoading: false, isUserSigned: false, user:null}
-      case "user/SignUp":
-        return {...state, isLoading: false, isUserSigned: false, user:null}
+        {
+          localStorage.removeItem('token')
+          localStorage.removeItem('name')
+          localStorage.removeItem('isAuthanticated')
+        return {...state, isLoading: false, isUserSigned: false, user:null, error:""}
+        }
+      case "user/signUp":
+        return initialState
       case "rejected":
           return {...state, isLoading:false, error:payload}
       default:
-        return "Unknown Action Type"
+        throw new Error("Unknown Action Type")
     }
   } 
   export default function UserProvider({children}) {
     const [{user, isLoading, isUserSigned, error}, dispatch] 
     = useReducer(reducer, initialState)
-      // const [user, setUser] = useState({})
-      // const [isUserSigned, setIsUserSigned] = useState(false)
-      // const [error, setError] = useState('')
-      // const [isLoading, setIsLoading] = useState(false)
-      const token = localStorage.getItem('token')
-      const navigate = useNavigate()
+     
 
       useEffect(()=>{
-        console.log(''==false);
-        if (token) dispatch({type:"user/authanticated", payload:true})
-        else {
-          dispatch({type:"user/signOut"})
-        }
-      },[token])
+        
+       if (localStorage.getItem('token'))
+          dispatch({type:"user/authanticated"})
+      },[])
       async function signUp(email, pass, name) {
-        dispatch({type:"loading"})
+        return new Promise((resolve, reject)=>{
+
+          dispatch({type:"loading"})
           createUserWithEmailAndPassword(auth, email, pass).then((userCred)=>{
+            dispatch({type:"user/signUp"})
             const user = userCred.user
             const uId = user.uid
-            console.log("if in auth", uId);
               console.log("user added succesfully", userCred);
-              return creatUser(uId)
+              creatUser(uId).then(()=>resolve()).catch((err)=>reject(err))
           }).catch((err)=>{
+            console.log(err);
             if (err.message === "Firebase: Error (auth/email-already-in-use).")
-              dispatch({type:"rejeced", payload:"Email is already in use"})      
-            else if (err.message === "Firebase: Password should be at least 6 characters (auth/weak-password).")
-              dispatch({type:"rejeced", payload:"invalid email format"}) 
-            else if (err.message === "Firebase: Password should be at least 6 characters (auth/weak-password).")
-              dispatch({type:"rejeced", payload:"Password should be at least 6 characters"}) 
-            else dispatch({type:"rejeced", payload:"Error occured, try again"}) 
+              {
+                dispatch({type:"rejected", payload:"Email is already in use"})
+                reject("Email is already in use")
+              }  
+            else if (err.message === "Firebase: Error (auth/missing-email)." || err.message === "Firebase: Error (auth/invalid-email).")
+              {
+                dispatch({type:"rejected", payload:"Email is required and should be in this format XXX@XXX.XX"}) 
+                reject()
+              }
+            
+            else if (
+              err.message === "Firebase: Password should be at least 6 characters (auth/weak-password)."
+            || err.message === "Firebase: Password should be at least 6 characters (auth/missing-password)."
+              )
+              {
+                dispatch({type:"rejected", payload:"Password should be at least 6 characters"}) 
+                reject()
+              }
+            else {
+              dispatch({type:"rejected", payload:"Error occured, try again"}) 
+              reject()
+            }
             
           })
           const data = {
@@ -75,59 +91,45 @@
             await setDoc(userRef, data).then(()=>{
               console.log('user added to firestore')
             }).catch((err)=>{
-              dispatch({type:"rejeced", payload:err}) 
+              dispatch({type:"rejected", payload:err}) 
+              reject(err)
             })
-          }
-          
+          } 
+        })
+       
       }
 
       async function signIn(email, pass) {
         dispatch({type:"loading"}) 
           signInWithEmailAndPassword(auth, email, pass).then((userCred)=>{
-              console.log("signed in",userCred);
-              navigate("/app")
-          }).catch((err)=> dispatch({type:"rejeced", payload:err}) )
+            const userRef = doc(db, `users`, userCred.user.uid)
+                getDoc(userRef).then((userSnapshot)=>{
+                  if (userSnapshot.exists()) {
+                    localStorage.setItem('token', userCred.user.accessToken)
+                    localStorage.setItem('name', userSnapshot.data().name)
+                    const userObj = {...userSnapshot.data(), email: userCred.user.email, id:userCred.user.uid}
+                    dispatch({type:"user/signIn", payload:userObj}) 
+                    console.log({...userSnapshot.data(), email: userCred.user.email, id:userCred.user.uid});
+                  }
+                })
+                
+          }).catch((err)=> dispatch({type:"rejected", payload:"Invalid Email or Password"}) )
          
       }
-  function getUserData() {
-    onAuthStateChanged(auth, async (userSigned)=>{
-      if (userSigned) {
-        localStorage.setItem('token', userSigned.accessToken)
-        
-        const uId = userSigned.uid
-        const email = userSigned.email
-        const userRef = doc(db, `users`, uId)
-        const userSnapshot = await getDoc(userRef)
-        if (userSnapshot.exists()) {
-          const userObj = {...userSnapshot.data(), email, id:uId}
-          dispatch({type:"user/signIn", payload:userObj}) 
-        }
-        else console.log("user not found");
-      }
-      else {
-        console.log("user signed out");
-      }
-    })
-  }
-      
 
-      async function handleSignOut() {
-        signOut(auth).then(()=>{
-          localStorage.removeItem('token')
+      async function signOut() {
+        
           dispatch({type:"user/signOut"})
-        }).catch((err)=>{
-          console.log(err);
-        })
       }
     return <UserContext.Provider value={{
       user,
       signUp,
       signIn,
+      dispatch,
       isLoading,
       isUserSigned,
       error,
-      handleSignOut,
-      getUserData
+      signOut,
     }}>
       {children}
     </UserContext.Provider>

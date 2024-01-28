@@ -18,6 +18,7 @@ import {
 import useDecodeToken from "../hooks/useDecodeToken";
 import useLoacalStorage from "../hooks/useLocalStorage";
 import { useUser } from "./userContext";
+import { jwtDecode } from "jwt-decode";
 
 const CitiesContext = createContext();
 
@@ -50,38 +51,40 @@ function reducer(state, { type, payload }) {
   }
 }
 function CitiesProvider({ children }) {
-  const [token] = useLoacalStorage("", "token")
-  const {user} = useUser()
-  const decodedToken = useDecodeToken(token) 
+  const {isUserSigned} = useUser()
+  const token = localStorage.getItem('token')
+  const decodedToken = token && jwtDecode(token);
   const [{ cities, isLoading, currentCity, error }, dispatch] = useReducer(
     reducer,
     initialState
   );
 
   useEffect(() => {
-    console.log("token: ", decodedToken.user_id);
     async function fetchData() {
       dispatch({ type: "data/loading" });
-      await getCities()
+     
+        await getCities()
         .then((data) => {
           dispatch({ type: "cities/loaded", payload: data });
         })
         .catch((err) => dispatch({type:"data/rejected", payload:err}));
+      
+      
     }
-    fetchData();
-  }, [decodedToken.user_id, user.id]);
+    if (isUserSigned)
+      fetchData();
+  }, [isUserSigned]);
 
   async function getCities() {
     const citiesCol = collection(db, "cities");
     const citiesByUserId = query(citiesCol, where('userId', '==', decodedToken.user_id))
+    console.log(decodedToken.user_id);
     const citySnapshot = await getDocs(citiesByUserId);
     const cityList = [];
     citySnapshot.forEach((doc) => {
       cityList.push({ ...doc.data(), id: doc.id });
-      // setState({ ...state, cities: [...state.cities, newCity] });
     });
     dispatch({type:"cities/loaded", payload:cityList})
-    console.log(cities);
     return cityList;
   }
 

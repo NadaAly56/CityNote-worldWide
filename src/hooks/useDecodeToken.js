@@ -1,13 +1,23 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function useDecodeToken(token) {
     // Base64Url decode the payload
-    if (token)
+    const [payloadObject, setPayloadObject] = useState({
+      user_id:""
+    })
+    console.log(token);
+    useEffect(()=>{
+      if (token)
    {
+    console.log(token);
      const [headerEncoded, payloadEncoded] = token.split(".");
     const payloadDecoded = atob(payloadEncoded);
+    console.log(payloadDecoded);
     // Parse the payload as JSON
-    const payloadObject = JSON.parse(payloadDecoded);
-    return payloadObject
+     setPayloadObject(JSON.parse(payloadDecoded));
+    
    }
+    },[token])
+    return [payloadObject, setPayloadObject]
+    
 }
