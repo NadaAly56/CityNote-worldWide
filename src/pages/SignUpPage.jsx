@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import styles from "./styles/Login.module.css";
 import { NavBar } from "../components/navbar/navBar";
 import Button from '../components/button/Button';
@@ -17,10 +17,7 @@ export default function SignUpPage() {
           signUp(email, password, name)
           .then(()=>navigate('/login', {replace:true}))
         else dispatch({type:"rejected", payload:"All fields are required"})
-          // .catch((err)=>console.log(err))
-          
-
-       
+          // .catch((err)=>console.log(err))   
     }
     return (
       <main className={styles.login}>
