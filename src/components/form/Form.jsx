@@ -10,7 +10,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
 import { useCities } from "../../contexts/citiesContext";
 import { v4 as uuidv4 } from 'uuid';
-import useDecodeToken from "../../hooks/useDecodeToken";
+import { jwtDecode } from "jwt-decode";
 
 export function convertToEmoji(countryCode) {
   const codePoints = countryCode
@@ -32,9 +32,8 @@ function Form() {
   const [isGoeLoading, setIsGeoLoading] = useState(false);
   const [emoji, setEmoji] = useState("");
   const [geocodingError, setGeocodingError] = useState("");
-  const decodedToken = useDecodeToken(localStorage.getItem("token"))
+  const decodedToken = jwtDecode(localStorage.getItem('token'))
   useEffect(() => {
-    console.log(decodedToken);
     async function fetchCountry() {
       if (!lat && !lng) return;
       setIsGeoLoading(true);
