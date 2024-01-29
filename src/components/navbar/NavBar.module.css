@@ -35,7 +35,7 @@
     .nav ul {
      justify-content: flex-end;
       align-items: center;
-      gap: 4rem;
+      gap: 2rem;
     }
     .nav ul li:first-child, .nav ul li:nth-child(2) {
       display: none;
@@ -43,6 +43,21 @@
     a.ctaLink:link,
   a.ctaLink:visited {
     padding: 0.3rem 1rem;
+    font-size: smaller;
+  }
+  }
+  @media (max-width:557px) {
+    .nav ul {
+     justify-content: flex-end;
+      align-items: center;
+      gap: 1rem;
+    }
+    .nav ul li:first-child, .nav ul li:nth-child(2) {
+      display: none;
+    }
+    a.ctaLink:link,
+  a.ctaLink:visited {
+    padding: 0.2rem 0.5rem;
     font-size: smaller;
   }
   }

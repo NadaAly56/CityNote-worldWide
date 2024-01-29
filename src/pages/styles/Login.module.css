@@ -40,3 +40,12 @@
   font-size: large;
   border-radius: 5px;
 }
+@media (max-width:768px) {
+  .form {
+    width: 100%;
+   }
+  .login {
+    margin: 2.5rem;
+    padding: 0.5rem 1.5rem;
+  }
+}
