@@ -4,6 +4,7 @@ export default function CountryItem({country}) {
    
     return (
         <li className={styles.countryItem}>
+              <span>{country.emoji}</span>
             <h3 className={styles.name}>{country.country}</h3>
         </li> )
 }
