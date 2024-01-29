@@ -5,7 +5,7 @@ import Logo from '../logo/Logo';
 import { useUser } from '../../contexts/userContext';
 
 export const NavBar = () => {
-  const {handleSignOut, isUserSigned} = useUser()
+  const {signOut, isUserSigned} = useUser()
   return (
     <nav className={styles.nav}>
       <Logo />
@@ -26,7 +26,7 @@ export const NavBar = () => {
         </li>
           </> : 
           <li>
-          <NavLink className={styles.ctaLink} to="/" onClick={handleSignOut}>sign Out</NavLink>
+          <NavLink className={styles.ctaLink} to="/" onClick={signOut}>sign Out</NavLink>
         </li>
         }
        

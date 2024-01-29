@@ -17,3 +17,8 @@
   font-size: 1.2rem;
   color: var(--color-light--1);
 }
+@media (max-width: 992px) {
+  .sidebar {
+    flex-basis: 35rem;
+  }
+}

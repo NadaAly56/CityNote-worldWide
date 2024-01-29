@@ -8,7 +8,7 @@ export default function SignUpPage() {
   const navigate = useNavigate()
     const { signUp, isLoading, error, dispatch } = useUser()
     const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("qwerty");
+    const [password, setPassword] = useState("");
     const [name, setName] = useState('')
     
     async function handleSignUp(e){

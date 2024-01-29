@@ -8,8 +8,8 @@ import Button from "../components/button/Button";
 export default function Login() {
   const { signIn,  isLoading, isUserSigned, error, dispatch } = useUser()
   const navigate = useNavigate()
-  const [email, setEmail] = useState("jack@example.com");
-  const [password, setPassword] = useState("qwerty");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   
   async function handleSubmit(e){
     e.preventDefault()

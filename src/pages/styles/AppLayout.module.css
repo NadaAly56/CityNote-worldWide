@@ -5,3 +5,19 @@
   display: flex;
   position: relative;
 }
+@media (max-width:768px) {
+  /* .map {
+    width: 100%;
+  }
+  .sideBar {
+    width: 100%;
+  } */
+  .app {
+    height: 150vh;
+    padding: 2.4rem;
+    overscroll-behavior-y: auto;
+    display: flex;
+    flex-direction: column-reverse;
+    position: relative;
+  }
+}

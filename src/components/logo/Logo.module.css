@@ -9,7 +9,17 @@
   font-size: large;
   padding: 1rem;
   cursor: pointer;
-
   color: inherit;
   text-decoration: none;
+}
+@media (max-width:768px) {
+  .logo {
+    height: 2.2rem;
+  }
+  .head {
+    gap: 0.3rem;
+    align-items: center;
+    font-size: smaller;
+    padding: 1rem;
+  }
 }
