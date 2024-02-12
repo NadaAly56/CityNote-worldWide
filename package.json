@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@firebase/firestore": "^4.3.0",
+    "@popperjs/core": "^2.11.8",
     "firebase": "^10.5.0",
     "jwt-decode": "^4.0.0",
     "leaflet": "^1.9.4",

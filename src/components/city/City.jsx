@@ -1,16 +1,16 @@
 import React, { useEffect } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useCities } from '../../contexts/citiesContext';
 import styles from './City.module.css'
 import Button from '../button/Button';
 import Spinner from '../spinner/Spinner';
 export default function City() {
-    const {currentCity, setCurrentCity, getCurrentCity, isLoading} = useCities()
+    const {currentCity, getCurrentCity, isLoading} = useCities()
     const navigate = useNavigate()
     const {id} = useParams()
     useEffect(()=>{
         getCurrentCity(id)
-    },[id])
+    },[id, getCurrentCity])
     if (isLoading) return <Spinner />
     const {city_name, date, notes, emoji} = currentCity
     const formatedDate = date && date.toDate()? date.toDate().toDateString():"date"

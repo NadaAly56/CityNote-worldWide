@@ -6,6 +6,10 @@ import { useUser } from '../../contexts/userContext';
 
 export const NavBar = () => {
   const {signOut, isUserSigned} = useUser()
+
+  function handleClick() {
+    signOut();
+  }
   return (
     <nav className={styles.nav}>
       <Logo />
@@ -26,7 +30,7 @@ export const NavBar = () => {
         </li>
           </> : 
           <li>
-          <NavLink className={styles.ctaLink} to="/" onClick={signOut}>sign Out</NavLink>
+          <NavLink className={styles.ctaLink} to="/" onClick={handleClick}>sign Out</NavLink>
         </li>
         }
        

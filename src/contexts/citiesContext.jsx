@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useReducer } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useReducer } from "react";
 import { db } from "../config/firebase";
 import {
   collection,
@@ -51,56 +51,45 @@ function reducer(state, { type, payload }) {
 function CitiesProvider({ children }) {
   const { isUserSigned } = useUser();
   const token = localStorage.getItem("token");
-  const decodedToken = token && jwtDecode(token);
+  const decodedToken = useMemo(()=>{
+    return token?jwtDecode(token):null
+  },[token]);
   const [{ cities, isLoading, currentCity, error }, dispatch] = useReducer(
     reducer,
     initialState
   );
 
-  useEffect(() => {
-    async function fetchData() {
+ const getCities =  useCallback(async function getCities() {
+  const citiesCol = collection(db, "cities");
+  const citiesByUserId = query(
+    citiesCol,
+    where("userId", "==", decodedToken.user_id)
+  );
+  const citySnapshot = await getDocs(citiesByUserId);
+  const cityList = [];
+  citySnapshot.forEach((doc) => {
+    cityList.push({ ...doc.data(), id: doc.id });
+  });
+  dispatch({ type: "cities/loaded", payload: cityList });
+  return cityList;
+},[decodedToken])
+
+  const getCurrentCity = useCallback( async function getCurrentCity(id) {
+      if (id === currentCity.id) return;
       dispatch({ type: "data/loading" });
-
-      await getCities()
-        .then((data) => {
-          dispatch({ type: "cities/loaded", payload: data });
-        })
-        .catch((err) => dispatch({ type: "data/rejected", payload: err }));
-    }
-    if (isUserSigned) fetchData();
-  }, [isUserSigned]);
-
-  async function getCities() {
-    const citiesCol = collection(db, "cities");
-    const citiesByUserId = query(
-      citiesCol,
-      where("userId", "==", decodedToken.user_id)
-    );
-    console.log(decodedToken.user_id);
-    const citySnapshot = await getDocs(citiesByUserId);
-    const cityList = [];
-    citySnapshot.forEach((doc) => {
-      cityList.push({ ...doc.data(), id: doc.id });
-    });
-    dispatch({ type: "cities/loaded", payload: cityList });
-    return cityList;
-  }
-
-  async function getCurrentCity(id) {
-    if (id === currentCity.id) return;
-    dispatch({ type: "data/loading" });
-    const cityRef = doc(db, "cities", id);
-    const citySnapshot = await getDoc(cityRef);
-    if (citySnapshot.exists()) {
-      const city = { ...citySnapshot.data(), id: citySnapshot.id };
-      dispatch({ type: "cities/currentCity", payload: city });
-      return city;
-    } else
-      dispatch({
-        type: "data/rejected",
-        payload: "no city exists with this id",
-      });
-  }
+      const cityRef = doc(db, "cities", id);
+      const citySnapshot = await getDoc(cityRef);
+      if (citySnapshot.exists()) {
+        const city = { ...citySnapshot.data(), id: citySnapshot.id };
+        dispatch({ type: "cities/currentCity", payload: city });
+        return city;
+      } else
+        dispatch({
+          type: "data/rejected",
+          payload: "no city exists with this id",
+        });
+    
+  },[currentCity.id])
 
   async function addCity(data) {
     const docRef = doc(db, "cities", data.id);
@@ -127,6 +116,19 @@ function CitiesProvider({ children }) {
         dispatch({ type: "data/rejected", payload: error });
       });
   }
+
+  useEffect(() => {
+    async function fetchData() {
+      dispatch({ type: "data/loading" });
+
+      await getCities()
+        .then((data) => {
+          dispatch({ type: "cities/loaded", payload: data });
+        })
+        .catch((err) => dispatch({ type: "data/rejected", payload: err }));
+    }
+    if (isUserSigned) fetchData();
+  }, [isUserSigned, getCities]);
   return (
     <CitiesContext.Provider
       value={{
